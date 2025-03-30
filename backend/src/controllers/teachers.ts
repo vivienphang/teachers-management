@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import { Teacher } from "../../models/Teacher";
-import { TeacherInputType, TeacherResponseType } from "../types/index";
+import {
+  TeacherInputType,
+  TeacherResponseType,
+  TeachersListResponseType,
+} from "../types/index";
 
 export const createTeacher = async (
   req: Request<{}, {}, TeacherInputType>,
-  res: Response
+  res: Response<TeacherResponseType | { error: string }>
 ): Promise<void> => {
   const { name, subject, email, contactNumber } = req.body;
 
@@ -14,28 +18,31 @@ export const createTeacher = async (
   }
 
   try {
-    const teacher = await Teacher.create({
+    const response = await Teacher.create({
       name,
       subject,
       email,
       contactNumber,
     });
 
-    const { createdAt, updatedAt, ...newTeacher } = teacher.toJSON();
-    res.status(201).json(newTeacher as TeacherResponseType);
+    const { createdAt, updatedAt, ...newTeacher } = response.toJSON();
+    res.status(201).json(newTeacher);
   } catch (err: any) {
     console.error("Error creating teacher:", err);
     res.status(400).json({ error: err.message });
   }
 };
 
-export const getTeachers = async (_req: Request, res: Response) => {
+export const getTeachers = async (
+  _req: Request,
+  res: Response<TeachersListResponseType | { error: string }>
+) => {
   try {
     const response = await Teacher.findAll({
       order: [["createdAt", "DESC"]],
     });
 
-    const teachersList = response.map((teacher) => {
+    const teachersList: TeacherResponseType[] = response.map((teacher) => {
       const { createdAt, updatedAt, ...cleaned } = teacher.toJSON();
       return cleaned;
     });
