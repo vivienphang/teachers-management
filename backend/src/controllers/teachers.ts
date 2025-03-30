@@ -26,7 +26,7 @@ export const createTeacher = async (
     });
 
     const { createdAt, updatedAt, ...newTeacher } = response.toJSON();
-    res.status(201).json(newTeacher);
+    res.status(201).json(newTeacher as TeacherResponseType);
   } catch (err: any) {
     console.error("Error creating teacher:", err);
     res.status(400).json({ error: err.message });
