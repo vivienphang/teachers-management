@@ -22,7 +22,8 @@ interface InputFieldProps {
     | ((e: React.ChangeEvent<HTMLInputElement>) => void)
     | ((e: SelectChangeEvent) => void);
   options?: { label: string; value: string }[];
-  errorText?: string;
+  error?: boolean;
+  helperText?: string;
 }
 
 const InputField = ({
@@ -33,13 +34,13 @@ const InputField = ({
   value,
   onChange,
   options = [],
-  errorText,
+  error,
+  helperText,
 }: InputFieldProps) => {
   const lowerType = type.toLowerCase();
-  const hasError = Boolean(errorText);
 
   return (
-    <FormControl fullWidth error={hasError} sx={{ mb: 2 }}>
+    <FormControl fullWidth error={error} sx={{ mb: 2 }}>
       <Typography mb={1}>{label}</Typography>
       {lowerType === "select" ? (
         <Select
@@ -70,7 +71,9 @@ const InputField = ({
           aria-label={label}
         />
       )}
-      {hasError && <FormHelperText>{errorText}</FormHelperText>}
+      <FormHelperText sx={{ minHeight: "20px" }}>
+        {error ? helperText : " "}
+      </FormHelperText>
     </FormControl>
   );
 };
