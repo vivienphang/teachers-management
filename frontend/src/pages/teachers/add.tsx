@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { KeyboardBackspace } from "@mui/icons-material";
 import { useState } from "react";
 import InputField, { InputFieldChangeEvent } from "../../ui/InputField/index";
+import { createTeacher } from "../../api/teachers";
+import { TeacherInput } from "../../types";
 
 const AddTeacher = () => {
   const navigate = useNavigate();
 
-  const [formInput, setFormInput] = useState({
+  const [formInput, setFormInput] = useState<TeacherInput>({
     name: "",
     subject: "",
     contactNumber: "",
@@ -31,11 +33,10 @@ const AddTeacher = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    console.log("Form input", formInput);
+    // console.log("Form input", formInput);
     e.preventDefault();
     try {
-      // TODO: API query
-      // await createTeacher(formInput);
+      await createTeacher(formInput);
       navigate("/teachers");
     } catch (err) {
       console.error("Submit error:", err);

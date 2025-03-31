@@ -11,45 +11,38 @@ import {
   TableHead,
   TableRow,
   Typography,
+  Alert,
 } from "@mui/material";
+import { Add } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-interface TeacherResponse {
-  id: number;
-  name: string;
-  subject: string;
-  contactNumber: string;
-  email: string;
-}
+import { fetchAllTeachers } from "../../api/teachers";
+import { TeacherResponse } from "../../types";
+
 const Teachers = () => {
   const navigate = useNavigate();
 
-  const [teachersData, setTeachersData] = useState<TeacherResponse[] | null>(
-    null
-  );
+  const [teachersData, setTeachersData] = useState<TeacherResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setTimeout(() => {
-      const mockData = [
-        {
-          id: 1,
-          name: "Ms. Rachel Tan",
-          subject: "Mathematics",
-          contactNumber: "+65 9123 4567",
-          email: "rachel.tan@example.com",
-        },
-        {
-          id: 2,
-          name: "Mr. John Lee",
-          subject: "Science",
-          contactNumber: "+65 8234 5678",
-          email: "john.lee@example.com",
-        },
-      ];
-      setTeachersData(mockData);
-      setIsLoading(false);
-    }, 1500); // 1.5s fake delay
+    const getTeachers = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const { data } = await fetchAllTeachers();
+        setTeachersData(data);
+      } catch (err: any) {
+        console.error("Failed to fetch teachers:", err);
+        setError(err.message || "Something went wrong. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getTeachers();
   }, []);
 
   return (
@@ -67,7 +60,11 @@ const Teachers = () => {
         >
           <CircularProgress />
         </Box>
-      ) : teachersData?.length === 0 ? (
+      ) : error ? (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      ) : teachersData.length === 0 ? (
         <Card
           sx={{
             p: 3,
@@ -85,6 +82,7 @@ const Teachers = () => {
             variant="contained"
             sx={{ textTransform: "none" }}
             onClick={() => navigate("/teachers/add")}
+            startIcon={<Add />}
           >
             Add Teacher
           </Button>
@@ -96,6 +94,7 @@ const Teachers = () => {
               variant="contained"
               onClick={() => navigate("/teachers/add")}
               sx={{ textTransform: "none" }}
+              startIcon={<Add />}
             >
               Add Teacher
             </Button>
@@ -105,19 +104,23 @@ const Teachers = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Subject</TableCell>
-                  <TableCell>Contact Number</TableCell>
-                  <TableCell>Email</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>#</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Name</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Subject</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>
+                    Work Contact
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {teachersData!.map((teacher) => (
+                {teachersData.map((teacher, index) => (
                   <TableRow key={teacher.id}>
+                    <TableCell>{index + 1}</TableCell>
                     <TableCell>{teacher.name}</TableCell>
                     <TableCell>{teacher.subject}</TableCell>
-                    <TableCell>{teacher.contactNumber}</TableCell>
                     <TableCell>{teacher.email}</TableCell>
+                    <TableCell>{teacher.contactNumber}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
