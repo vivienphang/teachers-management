@@ -5,6 +5,7 @@ import { useState } from "react";
 import InputField, { InputFieldChangeEvent } from "../../ui/InputField/index";
 import { createTeacher } from "../../api/teachers";
 import { TeacherInput } from "../../types";
+import { SUBJECT_OPTIONS } from "../classes/constants";
 
 const AddTeacher = () => {
   const navigate = useNavigate();
@@ -15,12 +16,20 @@ const AddTeacher = () => {
     contactNumber: "",
     email: "",
   });
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof TeacherInput, string>>
+  >({});
 
   const handleChange = (e: InputFieldChangeEvent) => {
     const { name, value } = e.target;
     setFormInput((prev) => ({
       ...prev,
       [name as string]: value,
+    }));
+    // Reset error
+    setErrors((prev) => ({
+      ...prev,
+      [name as keyof TeacherInput]: "",
     }));
   };
 
@@ -30,11 +39,40 @@ const AddTeacher = () => {
       ...prev,
       [e.target.name]: onlyDigits,
     }));
+    setErrors((prev) => ({
+      ...prev,
+      contactNumber: "",
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     // console.log("Form input", formInput);
     e.preventDefault();
+
+    const newErrors: typeof errors = {};
+
+    if (!formInput.name) newErrors.name = "Name is required.";
+    if (!formInput.subject) newErrors.subject = "Subject is required.";
+
+    // Ensure email is not empty and valid with symbol @
+    if (!formInput.email) {
+      newErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formInput.email)) {
+      newErrors.email = "Please enter a valid email.";
+    }
+
+    // Maximum 8 numerics allowed
+    if (!formInput.contactNumber) {
+      newErrors.contactNumber = "Contact number is required.";
+    } else if (!/^\d{8}$/.test(formInput.contactNumber)) {
+      newErrors.contactNumber = "Maximum of 8-digits allowed.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     try {
       await createTeacher(formInput);
       navigate("/teachers");
@@ -62,6 +100,8 @@ const AddTeacher = () => {
             placeholder="Name"
             value={formInput.name}
             onChange={handleChange}
+            error={Boolean(errors.name)}
+            helperText={errors.name}
           />
           <InputField
             label="Subject"
@@ -70,18 +110,19 @@ const AddTeacher = () => {
             placeholder="Select a subject"
             value={formInput.subject}
             onChange={handleChange}
-            options={[
-              { label: "Math", value: "math" },
-              { label: "Science", value: "science" },
-            ]}
+            options={SUBJECT_OPTIONS}
+            error={Boolean(errors.subject)}
+            helperText={errors.subject}
           />
           <InputField
             label="Email Address"
             name="email"
-            type="email"
+            type="text" // To keep error handling consistent
             placeholder="Email Address"
             value={formInput.email}
             onChange={handleChange}
+            error={Boolean(errors.email)}
+            helperText={errors.email}
           />
           <InputField
             label="Contact Number"
@@ -90,6 +131,8 @@ const AddTeacher = () => {
             placeholder="Contact number"
             value={formInput.contactNumber}
             onChange={handleNumberChange}
+            error={Boolean(errors.contactNumber)}
+            helperText={errors.contactNumber}
           />
         </form>
       </Card>
