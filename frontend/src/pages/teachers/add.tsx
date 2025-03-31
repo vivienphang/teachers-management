@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Card } from "@mui/material";
+import { Box, Typography, Button, Card, Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { KeyboardBackspace } from "@mui/icons-material";
 import { useState } from "react";
@@ -19,6 +19,7 @@ const AddTeacher = () => {
   const [errors, setErrors] = useState<
     Partial<Record<keyof TeacherInput, string>>
   >({});
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleChange = (e: InputFieldChangeEvent) => {
     const { name, value } = e.target;
@@ -51,7 +52,16 @@ const AddTeacher = () => {
 
     const newErrors: typeof errors = {};
 
-    if (!formInput.name) newErrors.name = "Name is required.";
+    // Ensure only alphabets
+    const validNamePattern = /^[A-Za-z ]+$/;
+
+    if (!formInput.name) {
+      newErrors.name = "Name is required.";
+    } else if (formInput.name.length > 20) {
+      newErrors.name = "Name must be at most 20 characters.";
+    } else if (!validNamePattern.test(formInput.name)) {
+      newErrors.name = "Only alphabets and spaces are allowed.";
+    }
     if (!formInput.subject) newErrors.subject = "Subject is required.";
 
     // Ensure email is not empty and valid with symbol @
@@ -75,7 +85,8 @@ const AddTeacher = () => {
 
     try {
       await createTeacher(formInput);
-      navigate("/teachers");
+      setShowSuccess(true);
+      setTimeout(() => navigate("/teachers"), 2000);
     } catch (err) {
       console.error("Submit error:", err);
     }
@@ -150,6 +161,16 @@ const AddTeacher = () => {
           Add Teacher
         </Button>
       </Box>
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Teacher added successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

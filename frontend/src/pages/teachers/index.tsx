@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchAllTeachers } from "../../api/teachers";
 import { TeacherResponse } from "../../types";
+import { SUBJECT_OPTIONS } from "../classes/constants";
 
 const Teachers = () => {
   const navigate = useNavigate();
@@ -44,6 +45,11 @@ const Teachers = () => {
 
     getTeachers();
   }, []);
+
+  const getSubjectLabel = (value: string) => {
+    const match = SUBJECT_OPTIONS.find((opt) => opt.value === value);
+    return match ? match.label : value;
+  };
 
   return (
     <Box p={4}>
@@ -118,7 +124,8 @@ const Teachers = () => {
                   <TableRow key={teacher.id}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{teacher.name}</TableCell>
-                    <TableCell>{teacher.subject}</TableCell>
+                    <TableCell>{getSubjectLabel(teacher.subject)}</TableCell>
+
                     <TableCell>{teacher.email}</TableCell>
                     <TableCell>{teacher.contactNumber}</TableCell>
                   </TableRow>

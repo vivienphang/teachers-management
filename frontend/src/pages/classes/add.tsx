@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Card } from "@mui/material";
+import { Box, Typography, Button, Card, Snackbar, Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { KeyboardBackspace } from "@mui/icons-material";
 import { useState, useEffect } from "react";
@@ -22,6 +22,7 @@ const AddClass = () => {
   const [errors, setErrors] = useState<
     Partial<Record<keyof ClassInput, string>>
   >({});
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const initData = async () => {
@@ -112,7 +113,8 @@ const AddClass = () => {
       };
 
       await createClass(payload);
-      navigate("/classes");
+      setShowSuccess(true);
+      setTimeout(() => navigate("/classes"), 2000);
     } catch (err) {
       console.error("Submit error:", err);
     }
@@ -181,6 +183,16 @@ const AddClass = () => {
           Add Class
         </Button>
       </Box>
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={3000}
+        onClose={() => setShowSuccess(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" sx={{ width: "100%" }}>
+          Class added successfully!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
