@@ -1,11 +1,22 @@
 import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 import sequelize from "./db";
 import teacherRoutes from "./routes/teachers";
 import classRoutes from "./routes/classes";
 import "../models";
 
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT;
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 app.use(express.json());
 
