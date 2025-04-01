@@ -31,3 +31,9 @@ export type ClassListItem = {
 export type ClassListResponse = {
   data: ClassListItem[];
 };
+
+export type ErrorType = {
+  error?: string;
+  message?: string;
+  details?: Record<string, string[]>;
+};

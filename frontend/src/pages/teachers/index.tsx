@@ -17,7 +17,7 @@ import { Add } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchAllTeachers } from "../../api/teachers";
-import { TeacherResponse } from "../../types";
+import { ErrorType, TeacherResponse } from "../../types";
 import { SUBJECT_OPTIONS } from "../classes/constants";
 
 const Teachers = () => {
@@ -28,22 +28,28 @@ const Teachers = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getTeachers = async () => {
+    const initData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         const { data } = await fetchAllTeachers();
         setTeachersData(data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to fetch teachers:", err);
-        setError(err.message || "Something went wrong. Please try again.");
+        const errorObj = err as ErrorType;
+        const message =
+          errorObj.error ||
+          errorObj.message ||
+          "Something went wrong. Please try again.";
+
+        setError(message);
       } finally {
         setIsLoading(false);
       }
     };
 
-    getTeachers();
+    initData();
   }, []);
 
   const getSubjectLabel = (value: string) => {
@@ -121,7 +127,7 @@ const Teachers = () => {
               </TableHead>
               <TableBody>
                 {teachersData.map((teacher, index) => (
-                  <TableRow key={teacher.id}>
+                  <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{teacher.name}</TableCell>
                     <TableCell>{getSubjectLabel(teacher.subject)}</TableCell>

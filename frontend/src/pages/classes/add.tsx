@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import InputField, { InputFieldChangeEvent } from "../../ui/InputField/index";
 import { fetchAllTeachers } from "../../api/teachers";
 import { createClass, getClassList } from "../../api/classes";
-import { ClassInput, TeacherResponse } from "../../types";
+import { ClassInput, ErrorType, TeacherResponse } from "../../types";
 import { PRIMARY_SCHOOL_LEVELS } from "./constants";
 
 const AddClass = () => {
@@ -21,8 +21,10 @@ const AddClass = () => {
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof ClassInput, string>>
-  >({});
-  const [showSuccess, setShowSuccess] = useState(false);
+  >({}); // partial: make keys of ClassInput optional in error handling
+  const [isSuccess, setIsSuccess] = useState(true);
+  const [alertText, setAlertText] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
     const initData = async () => {
@@ -65,8 +67,7 @@ const AddClass = () => {
       if (assignedTeacherEmails.includes(value)) {
         setErrors((prev) => ({
           ...prev,
-          teacherEmail:
-            "This teacher is already assigned to a class. Please select another.",
+          teacherEmail: "This teacher is already assigned to a class.",
         }));
       } else {
         // Reset error
@@ -91,8 +92,7 @@ const AddClass = () => {
     if (!formInput.teacherEmail) {
       newErrors.teacherEmail = "Form teacher is required.";
     } else if (assignedTeacherEmails.includes(formInput.teacherEmail)) {
-      newErrors.teacherEmail =
-        "Teacher already assigned. Please choose another.";
+      newErrors.teacherEmail = "This teacher is already assigned to a class.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -111,10 +111,37 @@ const AddClass = () => {
         name: `Class ${formInput.name}`,
         teacherEmail: formInput.teacherEmail,
       };
+      try {
+        await createClass(payload);
+        setAlertText("Class added successfully!");
+        setIsSuccess(true);
+        setShowAlert(true);
+        setTimeout(() => navigate("/classes"), 2000);
+      } catch (err) {
+        const errorObj = err as ErrorType;
 
-      await createClass(payload);
-      setShowSuccess(true);
-      setTimeout(() => navigate("/classes"), 2000);
+        console.error("error:", err);
+
+        let message =
+          errorObj.error || errorObj.message || "Failed to create class";
+
+        // Type check first
+        if (errorObj.details && typeof errorObj.details === "object") {
+          const messages: string[] = [];
+
+          Object.entries(errorObj.details).forEach(([field, fieldMessages]) => {
+            fieldMessages.forEach((msg) => {
+              messages.push(`${field}: ${msg}`);
+            });
+          });
+
+          message = messages.join("\n");
+        }
+
+        setAlertText(message);
+        setIsSuccess(false);
+        setShowAlert(true);
+      }
     } catch (err) {
       console.error("Submit error:", err);
     }
@@ -184,13 +211,17 @@ const AddClass = () => {
         </Button>
       </Box>
       <Snackbar
-        open={showSuccess}
-        autoHideDuration={3000}
-        onClose={() => setShowSuccess(false)}
+        open={showAlert}
+        autoHideDuration={4000}
+        onClose={() => setShowAlert(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Class added successfully!
+        <Alert
+          severity={isSuccess ? "success" : "error"}
+          sx={{ width: "100%", whiteSpace: "pre-line" }}
+          onClose={() => setShowAlert(false)}
+        >
+          {alertText}
         </Alert>
       </Snackbar>
     </Box>

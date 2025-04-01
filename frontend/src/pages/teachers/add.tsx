@@ -4,7 +4,7 @@ import { KeyboardBackspace } from "@mui/icons-material";
 import { useState } from "react";
 import InputField, { InputFieldChangeEvent } from "../../ui/InputField/index";
 import { createTeacher } from "../../api/teachers";
-import { TeacherInput } from "../../types";
+import { ErrorType, TeacherInput } from "../../types";
 import { SUBJECT_OPTIONS } from "../classes/constants";
 
 const AddTeacher = () => {
@@ -18,8 +18,10 @@ const AddTeacher = () => {
   });
   const [errors, setErrors] = useState<
     Partial<Record<keyof TeacherInput, string>>
-  >({});
-  const [showSuccess, setShowSuccess] = useState(false);
+  >({}); // partial: make keys of ClassInput optional in error handling
+  const [isSuccess, setIsSuccess] = useState(true);
+  const [alertText, setAlertText] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleChange = (e: InputFieldChangeEvent) => {
     const { name, value } = e.target;
@@ -57,7 +59,7 @@ const AddTeacher = () => {
 
     if (!formInput.name) {
       newErrors.name = "Name is required.";
-    } else if (formInput.name.length > 20) {
+    } else if (formInput.name.length > 0) {
       newErrors.name = "Name must be at most 20 characters.";
     } else if (!validNamePattern.test(formInput.name)) {
       newErrors.name = "Only alphabets and spaces are allowed.";
@@ -85,10 +87,32 @@ const AddTeacher = () => {
 
     try {
       await createTeacher(formInput);
-      setShowSuccess(true);
+      setAlertText("Teacher added successfully!");
+      setIsSuccess(true);
+      setShowAlert(true);
       setTimeout(() => navigate("/teachers"), 2000);
     } catch (err) {
-      console.error("Submit error:", err);
+      const errorObj = err as ErrorType;
+      console.error("error:", err);
+
+      let message =
+        errorObj.error || errorObj.message || "Failed to create teacher";
+
+      // Type check first
+      if (errorObj.details && typeof errorObj.details === "object") {
+        const messages: string[] = [];
+
+        Object.entries(errorObj.details).forEach(([field, fieldMessages]) => {
+          fieldMessages.forEach((msg) => {
+            messages.push(`${field}: ${msg}`);
+          });
+        });
+
+        message = messages.join("\n");
+      }
+      setAlertText(message);
+      setIsSuccess(false);
+      setShowAlert(true);
     }
   };
 
@@ -162,13 +186,17 @@ const AddTeacher = () => {
         </Button>
       </Box>
       <Snackbar
-        open={showSuccess}
-        autoHideDuration={3000}
-        onClose={() => setShowSuccess(false)}
+        open={showAlert}
+        autoHideDuration={4000}
+        onClose={() => setShowAlert(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert severity="success" sx={{ width: "100%" }}>
-          Teacher added successfully!
+        <Alert
+          severity={isSuccess ? "success" : "error"}
+          sx={{ width: "100%", whiteSpace: "pre-line" }}
+          onClose={() => setShowAlert(false)}
+        >
+          {alertText}
         </Alert>
       </Snackbar>
     </Box>

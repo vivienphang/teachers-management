@@ -16,7 +16,7 @@ import {
 import { Add } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ClassListItem, ClassListResponse, TeacherResponse } from "../../types";
+import { ClassListItem, ErrorType } from "../../types";
 import { getClassList } from "../../api/classes";
 
 const Classes = () => {
@@ -27,23 +27,29 @@ const Classes = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getTeachers = async () => {
+    const initData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
         const { data } = await getClassList();
         setClassesData(data);
-        console.log("class res:", data);
-      } catch (err: any) {
-        console.error("Failed to fetch teachers:", err);
-        setError(err.message || "Something went wrong. Please try again.");
+      } catch (err) {
+        console.error("Failed to fetch classes:", err);
+
+        const errorObj = err as ErrorType;
+        const message =
+          errorObj.error ||
+          errorObj.message ||
+          "Something went wrong. Please try again.";
+
+        setError(message);
       } finally {
         setIsLoading(false);
       }
     };
 
-    getTeachers();
+    initData();
   }, []);
 
   return (
