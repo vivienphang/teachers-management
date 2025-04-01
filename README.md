@@ -1,12 +1,34 @@
 # Teachers Management System 
 
+## User Flow + API
+
+**GET: `api/teachers`**
+> Assumption: Route `/` redirects to `api/teachers` to get all teachers.
+> If no teacher available, screenshot below is shown.
+
+![View Teachers List](./assets/teachers_index.png)
+**POST: `api/teachers`**
+> Assumption: Contact Number is limited to 8-digits, for +65 numbers only.
+> 
+![Add Teacher](./assets/teachers_add.png)
+**GET: `api/classes`**
+> Assumption: Route `/` redirects to `api/classes` to get all classes.
+> If no class available, screenshot below is shown.
+
+![View Classes List](./assets/classes_index.png)
+**POST: `api/classes`**
+> Assumption: Class Name expects 8-digits (e.g.: Class 1A) payload. If no teacher is available, a link to add teacher is shown.
+> 
+![Add Class](./assets/classes_add.png)
+
+
 ## Run the project
 
 ### 1. Clone the repository
 
 ```
 git clone https://github.com/vivienphang/teachers-management.git
-cd teachers-management-system
+cd teachers-management
 ```
 
 ### 2. Setup the backend
