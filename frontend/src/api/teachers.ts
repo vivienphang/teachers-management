@@ -18,7 +18,7 @@ export const fetchAllTeachers = async (): Promise<{
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Error in fetching all teachers.";
-    console.error("❌ Fetch or JSON parse error:", err);
+    console.error("Fetch or JSON parse error:", err);
     throw new Error(message);
   }
 };
@@ -27,24 +27,17 @@ export const fetchAllTeachers = async (): Promise<{
 export const createTeacher = async (
   data: TeacherInput
 ): Promise<TeacherResponse> => {
-  try {
-    const res = await fetch(BASE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
+  const res = await fetch(BASE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 
-    const result = await res.json();
+  const result = await res.json();
 
-    if (!res.ok) {
-      throw new Error(result?.error || "Failed to create teacher");
-    }
-
-    return result as TeacherResponse;
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Failed to create new teacher";
-    console.error("Error creating teacher:", err);
-    throw new Error(message || "Failed to create new teacher");
+  if (!res.ok) {
+    throw result;
   }
+
+  return result as TeacherResponse;
 };
