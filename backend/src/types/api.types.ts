@@ -35,3 +35,8 @@ export type ClassListItem = {
 export type ClassListResponseType = {
   data: ClassListItem[];
 };
+
+export type ApiResponseErrorType = {
+  error: string;
+  details?: Record<string, string[]>;
+};

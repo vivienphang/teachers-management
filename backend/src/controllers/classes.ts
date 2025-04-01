@@ -1,24 +1,28 @@
 import { Request, Response } from "express";
 import { Class } from "../../models/Class";
+import { Teacher } from "../../models/Teacher";
 import {
+  ApiResponseErrorType,
   ClassInputType,
   ClassListItem,
   ClassListResponseType,
   ClassResponseType,
-} from "../types";
-import { Teacher } from "../../models/Teacher";
+} from "../types/api.types";
+import { classSchema } from "../schemas/class.schema";
 
 export const createClass = async (
   req: Request<{}, {}, ClassInputType>,
-  res: Response<ClassResponseType | { error: string }>
-) => {
-  const { level, name, teacherEmail } = req.body;
+  res: Response<ClassResponseType | ApiResponseErrorType>
+): Promise<void> => {
+  const parseResult = classSchema.safeParse(req.body);
 
-  // Basic validation
-  if (!level || !name || !teacherEmail) {
-    res.status(400).json({ error: "All fields are required." });
+  if (!parseResult.success) {
+    const fieldErrors = parseResult.error.flatten().fieldErrors;
+    res.status(400).json({ error: "Validation failed", details: fieldErrors });
     return;
   }
+
+  const { level, name, teacherEmail } = parseResult.data;
 
   try {
     // Check teachers table
@@ -54,7 +58,10 @@ export const createClass = async (
     res.status(201).json(newClass as ClassResponseType);
   } catch (err: any) {
     console.error("Error creating teacher:", err);
-    res.status(400).json({ error: err.message });
+    res.status(500).json({
+      error:
+        "Failed to create a class due to server error. Please try again later.",
+    });
   }
 };
 
@@ -87,6 +94,9 @@ export const getClassList = async (
     res.status(200).json({ data: formattedResponse });
   } catch (err: any) {
     console.error("Error fetching classes:", err);
-    res.status(500).json({ error: "Failed to fetch classes." });
+    res.status(500).json({
+      error:
+        "Failed to fetch classes due to server error. Please try again later.",
+    });
   }
 };
