@@ -59,8 +59,8 @@ const AddTeacher = () => {
 
     if (!formInput.name) {
       newErrors.name = "Name is required.";
-    } else if (formInput.name.length > 0) {
-      newErrors.name = "Name must be at most 20 characters.";
+    } else if (formInput.name.length > 30) {
+      newErrors.name = "Name must not be more than 30 characters.";
     } else if (!validNamePattern.test(formInput.name)) {
       newErrors.name = "Only alphabets and spaces are allowed.";
     }

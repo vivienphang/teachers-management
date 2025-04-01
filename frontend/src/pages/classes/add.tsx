@@ -11,6 +11,7 @@ import { PRIMARY_SCHOOL_LEVELS } from "./constants";
 const AddClass = () => {
   const navigate = useNavigate();
   const [teachers, setTeachers] = useState<TeacherResponse[]>([]);
+  const [isLoadingTeachers, setIsLoadingTeachers] = useState(true);
   const [assignedTeacherEmails, setAssignedTeacherEmails] = useState<string[]>(
     []
   );
@@ -49,6 +50,8 @@ const AddClass = () => {
         setAssignedTeacherEmails(assignedEmails);
       } catch (err) {
         console.error("Error fetching data:", err);
+      } finally {
+        setIsLoadingTeachers(false);
       }
     };
     initData();
@@ -174,7 +177,7 @@ const AddClass = () => {
             label="Class Name"
             name="name"
             type="text"
-            placeholder="Class Name"
+            placeholder="Class Name (e.g. 1A, 1B)"
             value={formInput.name}
             onChange={handleChange}
             error={Boolean(errors.name)}
@@ -193,6 +196,8 @@ const AddClass = () => {
             }))}
             error={Boolean(errors.teacherEmail)}
             helperText={errors.teacherEmail}
+            isTeacherEmpty={teachers.length === 0 ? true : false}
+            isLoadingTeachers={isLoadingTeachers}
           />
         </form>
       </Card>
