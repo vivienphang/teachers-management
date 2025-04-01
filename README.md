@@ -91,12 +91,14 @@ The frontend will run on http://localhost:5173
 
 ## Development Process
 1. Designed the database schema and defined the relationships between tables.
-2. Setup Sequelize models and ran migrations.
-3. Built the backend API endpoints and tested using Postman.
-4. Developed the frontend architecture: Components, pages, layouts, routes.
-5. Setup CORS on the backend to allow access from frontend.
-6. Implemented basic error handlings for smoother user flow.
-7. Documented setup instructions in `README.md` for reviewers.
+   > ![DB Schema](./assets/dbschema.jpg)
+   
+3. Setup Sequelize models and ran migrations.
+4. Built the backend API endpoints and tested using Postman.
+5. Developed the frontend architecture: Components, pages, layouts, routes.
+6. Setup CORS on the backend to allow access from frontend.
+7. Implemented basic error handlings for smoother user flow.
+8. Documented setup instructions in `README.md` for reviewers.
 
 ## Future Improvements & Considerations
 1. Unit Testing: Add unit and integration tests using Jest and React Testing Library to ensure component and API reliability.
