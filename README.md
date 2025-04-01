@@ -97,3 +97,7 @@ The frontend will run on http://localhost:5173
 5. Setup CORS on the backend to allow access from frontend.
 6. Implemented basic error handlings for smoother user flow.
 7. Documented setup instructions in `README.md` for reviewers.
+
+## Future Improvements & Considerations
+1. Unit Testing: Add unit and integration tests using Jest and React Testing Library to ensure component and API reliability.
+2. Mobile Responsiveness: Enhance layout across various screen sizes (mobile, tablet, desktop) for seamless user experience.
